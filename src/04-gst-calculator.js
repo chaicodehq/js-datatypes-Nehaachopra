@@ -40,4 +40,17 @@
  */
 export function calculateGST(amount, category) {
   // Your code here
+  let categories = {
+    "essential": 0,
+    "food": 5,
+    "standard": 12,
+    "electronics": 18,
+    "luxury": 28
+  }
+  if (!Number.isFinite(amount) || amount <= 0 || typeof category !== "string" || category === "" || !(category.toLowerCase() in categories)) return null;
+
+  const gstRate = categories[category.toLowerCase()];
+  let gstAmount = Math.round((amount * gstRate / 100) * 100) / 100;
+  const totalAmount = Math.round((amount + gstAmount) * 100) / 100;
+  return { baseAmount: amount, gstRate, gstAmount, totalAmount }
 }
