@@ -40,6 +40,60 @@
  *   generateReportCard({ name: "Priya", marks: { maths: 35, science: 28 } })
  *   // => { name: "Priya", totalMarks: 63, percentage: 31.5, grade: "F", ... }
  */
+
+// Agar student object nahi hai ya null hai, return null
+//  *   - Agar student.name string nahi hai ya empty hai, return null
+//  *   - Agar student.marks object nahi hai ya empty hai (no keys), return null
+//  *   - Agar koi mark valid number nahi hai (not between 0 and 100 inclusive),
+//  *     return null
 export function generateReportCard(student) {
   // Your code here
+  if (!student || typeof student !== "object") return null;
+  const name = student.name;
+  if (typeof name !== "string" || name === "") return null;
+
+  const marksObj = student.marks;
+  if (!marksObj || typeof marksObj !== "object" || Object.keys(marksObj).length === 0) return null;
+
+  let totalMarks = 0;
+  let percentage = 0;
+  let grade = "";
+  let highestSubject = "";
+  let highestMarks = 0;
+  let lowestSubject = "";
+  let lowestMarks = 100;
+  let passedSubjects = [];
+  let failedSubjects = [];
+  let subjectCount = 0;
+
+  for (let subject in marksObj) {
+    let subjectMarks = marksObj[subject];
+    if (typeof subjectMarks !== "number" || subjectMarks < 0 || subjectMarks > 100) return null;
+    subjectCount++;
+    totalMarks += subjectMarks;
+    if (subjectMarks > highestMarks) {
+      highestMarks = subjectMarks;
+      highestSubject = subject;
+    } 
+    if (subjectMarks < lowestMarks) {
+      lowestMarks = subjectMarks;
+      lowestSubject = subject;
+    }
+    if (subjectMarks >= 40) {
+      passedSubjects.push(subject);
+    }
+    else {
+      failedSubjects.push(subject)
+    }
+  }
+  percentage = parseFloat(((totalMarks / (subjectCount * 100)) * 100).toFixed(2));
+  
+  if (percentage < 40) grade = "F"
+  else if (percentage < 60) grade = "D"
+  else if (percentage < 70) grade = "C"
+  else if (percentage < 80) grade = "B"
+  else if (percentage < 90) grade = "A"
+  else grade = "A+"
+
+  return { name, totalMarks, percentage, grade, highestSubject, lowestSubject, passedSubjects, failedSubjects, subjectCount}
 }
