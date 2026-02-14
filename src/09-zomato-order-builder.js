@@ -47,4 +47,49 @@
  */
 export function buildZomatoOrder(cart, coupon) {
   // Your code here
+  //cart = [{ name: "Butter Chicken", price: 350, qty: 2, addons: ["Extra Butter:50", "Naan:40"] }, ...]
+  //Each addon string format: "AddonName:Price"
+  //deliveryFee: Rs 30 if subtotal < 500, Rs 15 if 500-999, FREE (0) if >= 1000
+  //- gst: 5% of subtotal, rounded to 2 decimal places parseFloat(val.toFixed(2))
+
+  if (!Array.isArray(cart) || cart.length < 1) return null;
+
+  let items = [];
+  for (let item of cart) {
+    const qty = item.qty;
+    if (!qty || qty <= 0) continue;
+    const basePrice = Number(item.price);
+    const addonTotal = item.addons?.reduce((acc, addon) => acc + Number(addon.split(":")[1]), 0) ?? 0;
+    const itemTotal = (basePrice + addonTotal) * qty
+    items.push({name: item.name, qty, basePrice, addonTotal, itemTotal})
+  }
+  
+  const subtotal = items.reduce((acc, item) => acc + item.itemTotal, 0);
+
+  let deliveryFee = 0;
+  if (subtotal < 500) deliveryFee = 30;
+  else if (subtotal < 1000) deliveryFee = 15;
+
+  const gst = parseFloat((subtotal * 5 / 100).toFixed(2));
+//    Coupon codes (case-insensitive):
+//  *     - "FIRST50"  => 50% off subtotal, max Rs 150 (use Math.min)
+//  *     - "FLAT100"  => flat Rs 100 off
+//  *     - "FREESHIP" => delivery fee becomes 0 (discount = original delivery fee value)
+//  *     - null/undefined/invalid string => no discount (0)
+  let discount = 0;
+  if (typeof coupon === "string") {
+    if (coupon.toUpperCase() === "FIRST50") {
+      discount = Math.min((subtotal * 50 / 100), 150);
+    }
+    else if (coupon.toUpperCase() === "FLAT100") {
+      discount = 100
+    }
+    else if (coupon.toUpperCase() === "FREESHIP") {
+      discount = deliveryFee;
+      deliveryFee = 0;
+    }
+  }
+  let grandTotal = parseFloat(Math.max(((subtotal + deliveryFee + gst) - discount), 0).toFixed(2))
+
+  return { items, subtotal, deliveryFee, gst, discount, grandTotal}
 }
