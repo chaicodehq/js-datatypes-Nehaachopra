@@ -63,4 +63,23 @@
  */
 export function validateForm(formData) {
   // Your code here
+  const result = {isValid: false, errors: {}}
+  const { name, email, phone, age, pincode, state, agreeTerms } = formData
+
+  if (typeof name !== "string" || name.trim().length < 2 || name.trim().length > 50) result.errors["name"] = "Name must be 2-50 characters";
+
+  if (typeof email !== "string" || email === "" || !email.includes("@") || !email.includes(".") || email.indexOf("@") !== email.lastIndexOf("@")) result.errors["email"] = "Invalid email format";
+
+  if (typeof phone !== "string" || !/^[6-9][0-9]{9}$/.test(phone)) result.errors["phone"] = "Invalid Indian phone number";
+
+  if (!Number.isInteger(Number(age)) || Number(age) < 16 || Number(age) > 100) result.errors["age"] = "Age must be an integer between 16 and 100";
+
+  if (!/^[1-9][0-9]{5}$/.test(pincode)) result.errors["pincode"] = "Invalid Indian pincode";
+
+  if ((state ?? "") === "") result.errors["state"] = "State is required"
+
+  if (!Boolean(agreeTerms)) result.errors["agreeTerms"] = "Must agree to terms";
+
+  if (Object.keys(result.errors).length <= 0) result.isValid = true;
+  return result;
 }
